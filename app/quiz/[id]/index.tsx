@@ -10,7 +10,7 @@ import {
   View
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { EnityName, MOCK_QUESTION, PHONETIC_DATA } from "./constant";
+import { EnityName, MOCK_QUESTION, PHONETIC_DATA } from "../../practice/[id]/constant";
 
 // ---- Types ----
 type ProgressStat = {
@@ -115,7 +115,7 @@ export default function PhoneList() {
       PHONETIC_DATA.map((p) => ({
         id: p.id,
         title: p.title,
-        progress: getProgressFromPhonetic(p.questions ?? [], resultById),
+        progress: getProgressFromPhonetic(p.items ?? [], resultById),
       })),
     [resultById]
   );
@@ -123,15 +123,18 @@ export default function PhoneList() {
   const selected = phoneticsWithProgress[activeIndex] ?? phoneticsWithProgress[0];
 
   const handleStart = () => {
-    if (selected) router.push(`/practice?id=${selected.id}` as never);
+    if (selected) router.push(`/practice/${selected.id}` as never);
   };
 
   return (
     <SafeAreaView className="flex-1 bg-white">
       {/* Header */}
       <View className="px-4 pt-3 pb-2 flex-row items-center">
+        <TouchableOpacity onPress={() => router.back()} className="mr-2">
+          <Ionicons name="arrow-back" size={22} color="#374151" />
+        </TouchableOpacity>
         <Image
-          source={require("../../assets/images/youpass-logo.png")}
+          source={require("../../../assets/images/youpass-logo.png")}
           style={{ width: 80, height: 28 }}
           resizeMode="contain"
         />

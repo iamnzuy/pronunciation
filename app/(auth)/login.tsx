@@ -1,24 +1,55 @@
 import { CText, CTextInput } from "@/components/CText";
+import { AxiosAPI, setAuthToken } from "@/lib/axios";
+import { getOrCreateDeviceId } from "@/lib/use-device-hook";
 import { router } from "expo-router";
 import { useState } from "react";
 import {
+  ActivityIndicator,
   Image,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  TextInput,
   TouchableOpacity,
-  View
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const handleLogin = () => {
-    router.push("/phonelist" as never);
+  async function login(username: string, password: string): Promise<{ token: string; user: any }> {
+    const deviceId = await getOrCreateDeviceId();
+    const res = await AxiosAPI.post("/v1/login", { username, password }, {
+      headers: { "X-Device-Id": deviceId },
+    });
+    console.log(res.data?.data?.access_token);
+    const access_token = res.data?.data?.access_token;
+    if (!access_token) throw new Error("Không nhận được token từ server");
+    await setAuthToken(access_token);
+    return { token: access_token, user: res.data?.data ?? res.data };
+  }
+
+  const handleLogin = async () => {
+    if (!email.trim() || !password.trim()) {
+      setError("Vui lòng nhập email và mật khẩu");
+      return;
+    }
+    setError("");
+    setLoading(true);
+    try {
+      await login(email.trim(), password);
+      router.replace("/course" as never);
+    } catch (err: any) {
+      const msg = err?.response?.data?.message ?? err?.message ?? "Đăng nhập thất bại";
+      setError(msg);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -103,18 +134,30 @@ export default function Login() {
             </View>
 
             {/* Forgot password */}
-            <TouchableOpacity className="self-end mb-8">
+            <TouchableOpacity className="self-end mb-4">
               <CText className="text-primary text-sm font-medium">
                 Quên mật khẩu?
               </CText>
             </TouchableOpacity>
 
+            {/* Error message */}
+            {!!error && (
+              <View className="bg-red-50 border border-red-200 rounded-xl px-4 py-3 mb-4">
+                <CText className="text-red-500 text-sm">{error}</CText>
+              </View>
+            )}
+
             {/* Login button */}
             <TouchableOpacity
               onPress={handleLogin}
+              disabled={loading}
               className="bg-primary rounded-2xl py-4 items-center mb-4"
+              style={{ opacity: loading ? 0.7 : 1 }}
             >
-              <CText className="text-white text-lg font-bold">Đăng nhập</CText>
+              {loading
+                ? <ActivityIndicator color="white" />
+                : <CText className="text-white text-lg font-bold">Đăng nhập</CText>
+              }
             </TouchableOpacity>
 
             {/* Divider */}

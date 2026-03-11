@@ -7,10 +7,11 @@ import { X } from "lucide-react-native";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Animated, Image, ScrollView, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import LoadingProgressSvg from "../../assets/images/loading-progress.svg";
+import LoadingProgressSvg from "../../../assets/images/loading-progress.svg";
 import { ClassNames, FilterOption, MAPPED_DRAFT_RESULT, PHONETIC_DATA } from "./constant";
 import BottomSheet from "@/components/BottomSheet";
 import Tooltip from "@/components/Tooltip";
+import { useRoute } from "@react-navigation/native";
 
 type WordStatus = "passed" | "not_passed" | "not_practiced";
 
@@ -32,7 +33,7 @@ export const ResultView = ({ currentQuestion, result }: any) => {
         return sentence.words.map((word: any, wordIndex: number) => {
           const wordMap = wordsMap.get(typeof word?.word_position !== "number" && (question_type === "WORD") ? 0 : word.word_position) as any;
           const stressMap = generateStressMap(wordMap?.ipa, wordMap?.phoneme_details);
-          const textSizeClass = currentQuestion?.question_type === "WORD" ? "text-t1-bold" : currentQuestion?.question_type === "SENTENCE" ? "text-t3-bold" : "text-t2-medium";
+          const textSizeClass = currentQuestion?.question_type === "WORD" ? "text-h3-bold" : currentQuestion?.question_type === "SENTENCE" ? "text-t1-bold" : "text-t2-medium";
           return (
             <View key={`result-${sentenceIndex}-${wordIndex}`} className={cn("flex flex-col items-center justify-center gap-1", textSizeClass, wordIndex !== 0 && "ml-[0.25em]")}>
               {question_type === "WORD" && <WordInWordType word={word} wordMap={wordMap} textSizeClass={textSizeClass} />}
@@ -139,7 +140,7 @@ export const QuestionView = ({ currentQuestion }: any) => {
         return sentence.words.map((word: any, wordIndex: number) => {
           const wordMap = wordsMap.get(typeof word?.word_position !== "number" && (question_type === "WORD") ? 0 : word.word_position) as any;
           const stressMap = generateStressMap(wordMap?.ipa, wordMap?.phoneme_details);
-          const textSizeClass = currentQuestion?.question_type === "WORD" ? "text-t1-bold" : currentQuestion?.question_type === "SENTENCE" ? "text-t3-bold" : "text-t2-medium";
+          const textSizeClass = currentQuestion?.question_type === "WORD" ? "text-h3-bold" : currentQuestion?.question_type === "SENTENCE" ? "text-t1-bold" : "text-t2-medium";
           return (
             <View key={`question-${sentenceIndex}-${wordIndex}`} className={cn("flex flex-col items-center justify-center gap-1", textSizeClass, wordIndex !== 0 && "ml-[0.25em]")}>
               <View className="flex-row justify-center">
@@ -182,7 +183,8 @@ export const PhonemesAndMeaning = ({ currentQuestion, word, stressMap }: { curre
 }
 
 export default function Practice() {
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const route = useRoute();
+  const { id } = route.params as { id: string };
   const shouldRedirect = !isValidId(id);
   const [result, setResult] = useState<any>(null);
 
@@ -197,7 +199,7 @@ export default function Practice() {
 
   useEffect(() => {
     if (!shouldRedirect) return;
-    const t = setTimeout(() => router.replace("/phonelist" as never), 0);
+    const t = setTimeout(() => router.replace(`/course` as never), 0);
     return () => clearTimeout(t);
   }, [shouldRedirect]);
 
@@ -261,7 +263,7 @@ export default function Practice() {
           </TouchableOpacity>
           <CText className="absolute left-1/2 -translate-x-1/2 text-t3-bold">Âm {phoneticData.title}</CText>
           <TouchableOpacity className="relative w-[4.125rem] h-[2.5rem] rounded-lg scale-110" style={{ backgroundColor: "#F97316" }}>
-            <Image source={require("../../assets/images/youpass-logo.png")} style={{ width: 60, height: 38, opacity: 0.3 }} resizeMode="cover" />
+            <Image source={require("../../../assets/images/youpass-logo.png")} style={{ width: 60, height: 38, opacity: 0.3 }} resizeMode="cover" />
             <View className="absolute inset-0 items-center justify-center">
               <Ionicons name="play-circle" size={22} color="white" />
             </View>
