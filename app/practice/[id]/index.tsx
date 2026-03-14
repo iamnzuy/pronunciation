@@ -1,26 +1,19 @@
+import LoadingProgressSvg from "@/assets/images/loading-progress.svg";
+import BottomSheet from "@/components/BottomSheet";
 import { CText } from "@/components/CText";
+import Tooltip from "@/components/Tooltip";
 import { generateStressMap } from "@/helpers";
 import { cn } from "@/lib/utils";
 import { Ionicons } from "@expo/vector-icons";
-import { router, useLocalSearchParams } from "expo-router";
+import { router } from "expo-router";
 import { X } from "lucide-react-native";
-import React, { useEffect, useMemo, useRef, useState } from "react";
-import { Animated, Image, ScrollView, TouchableOpacity, View } from "react-native";
+import React, { useState } from "react";
+import { Image, ScrollView, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import LoadingProgressSvg from "../../../assets/images/loading-progress.svg";
-import { ClassNames, FilterOption, MAPPED_DRAFT_RESULT, PHONETIC_DATA } from "./constant";
-import BottomSheet from "@/components/BottomSheet";
-import Tooltip from "@/components/Tooltip";
-import { useRoute } from "@react-navigation/native";
-
-type WordStatus = "passed" | "not_passed" | "not_practiced";
-
-type FilterTab = "all" | "not_practiced" | "not_passed";
-
-const isValidId = (id: string | undefined): number | false => {
-  if (id === undefined || id === null || isNaN(Number(id))) return false;
-  return Number(id);
-};
+import { ClassNames, FilterOption, FilterTab } from "./constant";
+import { useQuestion } from "./hooks/use-question";
+import { Recorder } from "./components/recorder";
+import { PhoneticDropdown } from "./components/phonetic-dropdown";
 
 export const ResultView = ({ currentQuestion, result }: any) => {
   const { question_type } = currentQuestion || {};
@@ -183,75 +176,25 @@ export const PhonemesAndMeaning = ({ currentQuestion, word, stressMap }: { curre
 }
 
 export default function Practice() {
-  const route = useRoute();
-  const { id } = route.params as { id: string };
-  const shouldRedirect = !isValidId(id);
   const [result, setResult] = useState<any>(null);
+  const { data: questions, title: pronunciationTitle } = useQuestion();
+  const draftResult = null;
 
-  const [selectedPhoneticId, setSelectedPhoneticId] = useState(isValidId(id) ?? PHONETIC_DATA[0]?.id);
-  const phoneticData = PHONETIC_DATA.find((p) => p.id === selectedPhoneticId) ?? PHONETIC_DATA[0];
-  const [questions, setQuestions] = useState<any[]>(phoneticData?.items ?? []);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [filterTab, setFilterTab] = useState<FilterTab>("all");
-  const [isRecording, setIsRecording] = useState(false);
-  const [isPhoneticDropdownOpen, setIsPhoneticDropdownOpen] = useState(false);
-  const pulseAnim = useRef(new Animated.Value(1)).current;
-
-  useEffect(() => {
-    if (!shouldRedirect) return;
-    const t = setTimeout(() => router.replace(`/course` as never), 0);
-    return () => clearTimeout(t);
-  }, [shouldRedirect]);
-
-  if (shouldRedirect) return null;
 
   const currentQuestion = questions[currentIndex];
-
-  const draftResult = useMemo(() => {
-    return MAPPED_DRAFT_RESULT.get(currentQuestion?.id);
-  }, [currentQuestion?.id]);
-
-  const total = questions.length;
-  const questionIndex = currentIndex;
-  const totalItems = total;
 
   const handleClose = () => router.back();
 
   const handleChangeQuestion = (type: "previous" | "next") => {
     if (type === "previous" && currentIndex > 0) setCurrentIndex(currentIndex - 1);
-    else if (type === "next" && currentIndex < total - 1) setCurrentIndex(currentIndex + 1);
+    else if (type === "next" && currentIndex < questions.length - 1) setCurrentIndex(currentIndex + 1);
   };
 
   const handleSelectWord = (wordId: number) => {
-    const idx = questions.findIndex((w) => w.id === wordId);
+    const idx = questions.findIndex((w: any) => w.id === wordId);
     if (idx !== -1) setCurrentIndex(idx);
-  };
-
-  const handleSelectPhonetic = (p: any) => {
-    setSelectedPhoneticId(p.id);
-    setQuestions(p.questions);
-    setCurrentIndex(0);
-    setIsPhoneticDropdownOpen(false);
-  };
-
-  const handleMicPress = () => {
-    if (isRecording) {
-      setIsRecording(false);
-      pulseAnim.setValue(1);
-      setQuestions((prev) =>
-        prev.map((w, i) =>
-          i === currentIndex ? { ...w, status: (Math.random() > 0.5 ? "passed" : "not_passed") as WordStatus } : w
-        )
-      );
-    } else {
-      setIsRecording(true);
-      Animated.loop(
-        Animated.sequence([
-          Animated.timing(pulseAnim, { toValue: 1.2, duration: 500, useNativeDriver: true }),
-          Animated.timing(pulseAnim, { toValue: 1, duration: 500, useNativeDriver: true }),
-        ])
-      ).start();
-    }
   };
 
   return (
@@ -261,9 +204,9 @@ export default function Practice() {
           <TouchableOpacity onPress={handleClose} className="w-9 h-9 rounded-full border border-grey-100 items-center justify-center">
             <X size={20} className="text-dark-75" />
           </TouchableOpacity>
-          <CText className="absolute left-1/2 -translate-x-1/2 text-t3-bold">Âm {phoneticData.title}</CText>
+          <CText className="absolute left-1/2 -translate-x-1/2 text-t3-bold">Âm {pronunciationTitle}</CText>
           <TouchableOpacity className="relative w-[4.125rem] h-[2.5rem] rounded-lg scale-110" style={{ backgroundColor: "#F97316" }}>
-            <Image source={require("../../../assets/images/youpass-logo.png")} style={{ width: 60, height: 38, opacity: 0.3 }} resizeMode="cover" />
+            <Image source={require("@/assets/images/youpass-logo.png")} style={{ width: 60, height: 38, opacity: 0.3 }} resizeMode="cover" />
             <View className="absolute inset-0 items-center justify-center">
               <Ionicons name="play-circle" size={22} color="white" />
             </View>
@@ -272,13 +215,13 @@ export default function Practice() {
 
         <View className="flex flex-row gap-8 items-center w-full h-8">
           <View className="h-1.5 flex-1 bg-grey-100 rounded-full w-full relative">
-            <View className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 bg-secondary-01 w-8 h-8 rounded-full flex items-center justify-center z-10" style={{ left: `${((questionIndex + 1) / totalItems * 100)}%` }}>
+            <View className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 bg-secondary-01 w-8 h-8 rounded-full flex items-center justify-center z-10" style={{ left: `${((currentIndex + 1) / questions.length * 100)}%` }}>
               <LoadingProgressSvg width={16} height={16} />
             </View>
-            <View className="h-full bg-secondary-01 rounded-full" style={{ width: `${((questionIndex + 1) / totalItems * 100)}%` }} />
+            <View className="h-full bg-secondary-01 rounded-full" style={{ width: `${((currentIndex + 1) / questions.length * 100)}%` }} />
           </View>
           <CText className="text-t3-regular text-right">
-            <CText className="font-bold text-secondary-01">{questionIndex + 1}</CText>/{totalItems}
+            <CText className="font-bold text-secondary-01">{currentIndex + 1}</CText>/{questions.length}
           </CText>
         </View>
 
@@ -302,39 +245,10 @@ export default function Practice() {
               <Ionicons name="arrow-forward" size={18} color="#374151" />
             </TouchableOpacity>
           </View>
-          <View className="items-center">
-            <Animated.View style={{ transform: [{ scale: pulseAnim }] }}>
-              <TouchableOpacity
-                onPress={handleMicPress}
-                className="w-10 h-10 rounded-full items-center justify-center bg-primary"
-                activeOpacity={0.85}
-              >
-                <Ionicons name={isRecording ? "stop" : "mic"} size={26} color="white" />
-              </TouchableOpacity>
-            </Animated.View>
-          </View>
+          <Recorder currentQuestion={currentQuestion} />
         </View>
-
         <View className="flex flex-row justify-between items-center w-full">
-          <View className="relative">
-            <TouchableOpacity className="flex-row items-center justify-between gap-2 border border-gray-200 rounded-full py-2.5 px-4" onPress={() => setIsPhoneticDropdownOpen((prev) => !prev)}>
-              <CText className="text-sm font-semibold">{phoneticData.title}</CText>
-              <Ionicons name="chevron-down" size={14} color="#6B7280" />
-            </TouchableOpacity>
-            {isPhoneticDropdownOpen && <ScrollView style={{ maxHeight: 200 }} showsVerticalScrollIndicator className="absolute min-w-36 w-max bg-white z-50 top-full mt-2 border border-gray-200 rounded-2xl flex flex-col">
-              {PHONETIC_DATA.map((p) => {
-                const isSelected = p.id === selectedPhoneticId;
-                return (
-                  <TouchableOpacity key={p.id} onPress={() => handleSelectPhonetic(p)} className="px-3 py-2.5 flex flex-row gap-2 items-center justify-start">
-                    <View className="w-4 h-4 border border-dark-75 bg-white rounded-full flex items-center justify-center">
-                      {isSelected && <View className="w-2.5 h-2.5 aspect-square rounded-full flex-shrink-0 bg-dark-75" />}
-                    </View>
-                    <CText className="text-t3-medium">{p.title}</CText>
-                  </TouchableOpacity>
-                );
-              })}
-            </ScrollView>}
-          </View>
+          <PhoneticDropdown />
           <TouchableOpacity className="py-2.5 px-4 rounded-full bg-secondary-01">
             <CText className="text-white font-bold text-t3-bold">Nộp bài</CText>
           </TouchableOpacity>
@@ -354,9 +268,9 @@ export default function Practice() {
           ))}
         </View>
         <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
-          {questions.map((w) => {
+          {questions.map((w: any) => {
             const isActive = w.id === currentQuestion?.id;
-            const draftResult = MAPPED_DRAFT_RESULT.get(w.id);
+            const draftResult = null as any;
             return (
               <TouchableOpacity key={w.id} onPress={() => handleSelectWord(w.id)} className={cn("flex-row items-center px-4 py-3", isActive && "bg-white-25")}>
                 <CText className="flex-1 w-full min-w-0 line-clamp-2 text-t3-regular">{w.title}</CText>

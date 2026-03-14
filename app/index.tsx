@@ -64,7 +64,7 @@ export default function Onboarding() {
     <SafeAreaView className="flex-1 bg-white">
       <View className="px-6 pt-20 pb-10 flex-row justify-center items-center">
         <Image
-          source={require("../assets/images/youpass-logo.png")}
+          source={require("@/assets/images/youpass-logo.png")}
           style={{ height: 100, width: 280 }}
           className={cn(isLastSlide && "scale-50")}
           resizeMode="contain"

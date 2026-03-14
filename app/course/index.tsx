@@ -12,6 +12,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { getTypeId } from "./helpers";
 import { EnumCollection, EnumIcon } from "./constant";
 import { useClass } from "./hooks/use-class";
+import { useRoute } from "@react-navigation/native";
 
 const CMS_URL = process.env.EXPO_PUBLIC_CMS;
 
@@ -20,6 +21,7 @@ function PartCard({ part, onPress }: { part: any; onPress: () => void }) {
   const enumPart = EnumCollection[typeId];
   const enumIcon = EnumIcon[typeId];
   const thumbUrl = part.thumbnail ? `${CMS_URL}/assets/${part.thumbnail}` : null;
+  console.log(part, "part");
 
   return (
     <TouchableOpacity
@@ -67,7 +69,7 @@ function TopicAccordion({ topic }: { topic: any }) {
 
   const handlePartPress = (part: any) => {
     if (part.type === 6) {
-      router.push(`/quiz/${part.id}` as never);
+      router.push(`/quiz/${part.item_id}?classId=669` as never);
     }
   };
 

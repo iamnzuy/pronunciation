@@ -10,7 +10,9 @@ import {
   View
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { EnityName, MOCK_QUESTION, PHONETIC_DATA } from "../../practice/[id]/constant";
+import { EnityName } from "@/app/practice/[id]/constant";
+import { usePhoneList } from "./hooks/use-phonelist";
+import { useRoute } from "@react-navigation/native";
 
 // ---- Types ----
 type ProgressStat = {
@@ -37,36 +39,6 @@ const ENTITY_LABEL: Record<keyof ProgressMap, string> = {
   sentence: EnityName.sentence,
   paragraph: EnityName.paragraph,
 };
-
-// ---- Helper ----
-/** Map question id -> result (status 1 = passed) từ MOCK_QUESTION */
-function buildResultById() {
-  const map = new Map<number, { status?: number } | null>();
-  for (const q of MOCK_QUESTION) {
-    map.set(q.id, q.result ?? null);
-  }
-  return map;
-}
-
-/** Tính progress cho một phonetic từ questions + kết quả trong MOCK_QUESTION */
-function getProgressFromPhonetic(
-  questions: Array<{ id: number; question_type?: string }>,
-  resultById: Map<number, { status?: number } | null>
-): ProgressMap {
-  const progress: ProgressMap = {};
-  for (const q of questions ?? []) {
-    const key = QUESTION_TYPE_TO_KEY[q.question_type ?? "WORD"];
-    if (!key) continue;
-    if (!progress[key])
-      progress[key] = { total: 0, passed: 0, not_passed: 0, not_practiced: 0 };
-    progress[key].total!++;
-    const res = resultById.get(q.id);
-    if (res?.status === 1) progress[key].passed!++;
-    else if (res != null) progress[key].not_passed!++;
-    else progress[key].not_practiced!++;
-  }
-  return progress;
-}
 
 function getCardStatus(progress: ProgressMap) {
   const stats = Object.values(progress).filter(Boolean) as ProgressStat[];
@@ -107,23 +79,13 @@ function DonutProgress({ stat }: { stat: ProgressStat }) {
 // ---- Main component ----
 export default function PhoneList() {
   const [activeIndex, setActiveIndex] = useState(0);
-  const isLoading = false;
+  const { data: phoneticList, isLoading } = usePhoneList();
+  const { id } = useRoute().params as { id: string };
 
-  const resultById = useMemo(() => buildResultById(), []);
-  const phoneticsWithProgress = useMemo(
-    () =>
-      PHONETIC_DATA.map((p) => ({
-        id: p.id,
-        title: p.title,
-        progress: getProgressFromPhonetic(p.items ?? [], resultById),
-      })),
-    [resultById]
-  );
-
-  const selected = phoneticsWithProgress[activeIndex] ?? phoneticsWithProgress[0];
+  const selected = phoneticList[activeIndex] ?? phoneticList[0];
 
   const handleStart = () => {
-    if (selected) router.push(`/practice/${selected.id}` as never);
+    if (selected) router.push(`/practice/${id}?pronunciation=${selected.id}&classId=669` as never);
   };
 
   return (
@@ -134,7 +96,7 @@ export default function PhoneList() {
           <Ionicons name="arrow-back" size={22} color="#374151" />
         </TouchableOpacity>
         <Image
-          source={require("../../../assets/images/youpass-logo.png")}
+          source={require("@/assets/images/youpass-logo.png")}
           style={{ width: 80, height: 28 }}
           resizeMode="contain"
         />
@@ -172,11 +134,10 @@ export default function PhoneList() {
           </View>
         ) : (
           <View className="flex-row flex-wrap gap-3">
-            {phoneticsWithProgress.map((item, index) => {
+            {phoneticList.map((item: any, index: number) => {
               const isActive = activeIndex === index;
               const status = getCardStatus(item.progress);
               const isFinished = status === "passed";
-
               const borderColor = isActive ? "#13A62E" : "#E5E7EB";
               const bgColor = isActive ? "#F0FDF4" : "#FFFFFF";
 
@@ -213,7 +174,6 @@ export default function PhoneList() {
                     )}
                   </View>
 
-                  {/* Progress stats */}
                   <View className="flex-row flex-wrap gap-3">
                     {(Object.entries(item.progress) as [keyof ProgressMap, ProgressStat][]).map(
                       ([key, stat]) => {

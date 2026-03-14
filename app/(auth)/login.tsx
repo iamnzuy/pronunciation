@@ -74,7 +74,7 @@ export default function Login() {
           <View className="px-6 flex-1">
             <View className="items-center mt-6 mb-10">
               <Image
-                source={require("../../assets/images/youpass-logo.png")}
+                source={require("@/assets/images/youpass-logo.png")}
                 style={{ height: 48, width: 144 }}
                 resizeMode="contain"
               />
