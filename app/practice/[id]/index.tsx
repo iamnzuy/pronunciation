@@ -8,12 +8,14 @@ import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { X } from "lucide-react-native";
 import React, { useState } from "react";
-import { Image, ScrollView, TouchableOpacity, View } from "react-native";
+import { Image, ScrollView, Touchable, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ClassNames, FilterOption, FilterTab } from "./constant";
 import { useQuestion } from "./hooks/use-question";
 import { Recorder } from "./components/recorder";
 import { PhoneticDropdown } from "./components/phonetic-dropdown";
+import { usePhoneList } from "@/app/quiz/[id]/hooks/use-phonelist";
+import { PronunciationStore } from "./hooks/store";
 
 export const ResultView = ({ currentQuestion, result }: any) => {
   const { question_type } = currentQuestion || {};
@@ -155,7 +157,7 @@ export const PhonemesAndMeaning = ({ currentQuestion, word, stressMap }: { curre
   return (<>
     {(currentQuestion?.question_type === "WORD" || currentQuestion?.question_type === "SENTENCE") &&
       <View className="flex-row justify-center">
-        <CText className="text-t5-regular">
+        <CText className="text-t2-regular">
           /{word.phoneme_details?.map((phoneme: any, phonemeIndex: number) => {
             return (<React.Fragment key={`phoneme-${phonemeIndex}`}>
               {stressMap[phonemeIndex] === "primary" && <CText>ˈ</CText>}
@@ -167,34 +169,34 @@ export const PhonemesAndMeaning = ({ currentQuestion, word, stressMap }: { curre
       </View>
     }
     {currentQuestion?.question_type === "WORD" && (
-      <View className="flex flex-row flex-wrap items-center justify-center gap-[0.25em]">
-        <CText className="text-t5-regular text-dark-50 text-center">{currentQuestion?.content}</CText>
-        <CText className="text-t5-regular text-dark-50 text-center">{currentQuestion?.word_class && `(${currentQuestion?.word_class})`}</CText>
+      <View className="flex flex-row flex-wrap items-center justify-center text-t4-regular gap-[0.25em]">
+        <CText className="text-t4-regular text-dark-50 text-center">{currentQuestion?.content}</CText>
+        <CText className="text-t4-regular text-dark-50 text-center">{currentQuestion?.word_class && `(${currentQuestion?.word_class})`}</CText>
       </View>
     )}
   </>)
 }
 
 export default function Practice() {
-  const [result, setResult] = useState<any>(null);
-  const { data: questions, title: pronunciationTitle } = useQuestion();
+  const { result, currentQuestionIndex, setCurrentQuestionIndex } = PronunciationStore();
+
+  const { data: questions, title: pronunciationTitle, instruction } = useQuestion();
   const draftResult = null;
 
-  const [currentIndex, setCurrentIndex] = useState(0);
   const [filterTab, setFilterTab] = useState<FilterTab>("all");
 
-  const currentQuestion = questions[currentIndex];
+  const currentQuestion = questions[currentQuestionIndex];
 
   const handleClose = () => router.back();
 
   const handleChangeQuestion = (type: "previous" | "next") => {
-    if (type === "previous" && currentIndex > 0) setCurrentIndex(currentIndex - 1);
-    else if (type === "next" && currentIndex < questions.length - 1) setCurrentIndex(currentIndex + 1);
+    if (type === "previous" && currentQuestionIndex > 0) setCurrentQuestionIndex(currentQuestionIndex - 1);
+    else if (type === "next" && currentQuestionIndex < questions.length - 1) setCurrentQuestionIndex(currentQuestionIndex + 1);
   };
 
   const handleSelectWord = (wordId: number) => {
     const idx = questions.findIndex((w: any) => w.id === wordId);
-    if (idx !== -1) setCurrentIndex(idx);
+    if (idx !== -1) setCurrentQuestionIndex(idx);
   };
 
   return (
@@ -204,24 +206,24 @@ export default function Practice() {
           <TouchableOpacity onPress={handleClose} className="w-9 h-9 rounded-full border border-grey-100 items-center justify-center">
             <X size={20} className="text-dark-75" />
           </TouchableOpacity>
-          <CText className="absolute left-1/2 -translate-x-1/2 text-t3-bold">Âm {pronunciationTitle}</CText>
-          <TouchableOpacity className="relative w-[4.125rem] h-[2.5rem] rounded-lg scale-110" style={{ backgroundColor: "#F97316" }}>
-            <Image source={require("@/assets/images/youpass-logo.png")} style={{ width: 60, height: 38, opacity: 0.3 }} resizeMode="cover" />
-            <View className="absolute inset-0 items-center justify-center">
+          <CText className="absolute left-1/2 -translate-x-1/2 text-t1-bold">Âm {pronunciationTitle}</CText>
+          <View className="relative w-24 h-14 rounded-lg opacity-100">
+            <Image source={{ uri: instruction?.video_thumbnail_url }} className="w-full h-full rounded-lg" resizeMode="contain" />
+            <TouchableOpacity className="absolute inset-0 items-center justify-center">
               <Ionicons name="play-circle" size={22} color="white" />
-            </View>
-          </TouchableOpacity>
+            </TouchableOpacity>
+          </View>
         </View>
 
-        <View className="flex flex-row gap-8 items-center w-full h-8">
+        <View className="flex flex-row gap-8 items-center w-full h-8 px-3">
           <View className="h-1.5 flex-1 bg-grey-100 rounded-full w-full relative">
-            <View className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 bg-secondary-01 w-8 h-8 rounded-full flex items-center justify-center z-10" style={{ left: `${((currentIndex + 1) / questions.length * 100)}%` }}>
+            <View className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 bg-secondary-01 w-8 h-8 rounded-full flex items-center justify-center z-10" style={{ left: `${((currentQuestionIndex + 1) / questions.length * 100)}%` }}>
               <LoadingProgressSvg width={16} height={16} />
             </View>
-            <View className="h-full bg-secondary-01 rounded-full" style={{ width: `${((currentIndex + 1) / questions.length * 100)}%` }} />
+            <View className="h-full bg-secondary-01 rounded-full" style={{ width: `${((currentQuestionIndex + 1) / questions.length * 100)}%` }} />
           </View>
           <CText className="text-t3-regular text-right">
-            <CText className="font-bold text-secondary-01">{currentIndex + 1}</CText>/{questions.length}
+            <CText className="font-bold text-secondary-01">{currentQuestionIndex + 1}</CText>/{questions.length}
           </CText>
         </View>
 
@@ -229,18 +231,18 @@ export default function Practice() {
           <View className="flex-1 flex-row items-center gap-3">
             <TouchableOpacity
               onPress={() => handleChangeQuestion("previous")}
-              disabled={currentIndex <= 0}
+              disabled={currentQuestionIndex <= 0}
               className="w-10 h-10 rounded-full border border-gray-200 items-center justify-center flex-shrink-0"
-              style={{ opacity: currentIndex <= 0 ? 0.3 : 1 }}
+              style={{ opacity: currentQuestionIndex <= 0 ? 0.3 : 1 }}
             >
               <Ionicons name="arrow-back" size={18} color="#374151" />
             </TouchableOpacity>
             {(result || draftResult) ? <ResultView currentQuestion={currentQuestion} result={result || draftResult} /> : <QuestionView currentQuestion={currentQuestion} />}
             <TouchableOpacity
               onPress={() => handleChangeQuestion("next")}
-              disabled={currentIndex >= questions.length - 1}
+              disabled={currentQuestionIndex >= questions.length - 1}
               className="w-10 h-10 rounded-full border border-gray-200 items-center justify-center flex-shrink-0"
-              style={{ opacity: currentIndex >= questions.length - 1 ? 0.3 : 1 }}
+              style={{ opacity: currentQuestionIndex >= questions.length - 1 ? 0.3 : 1 }}
             >
               <Ionicons name="arrow-forward" size={18} color="#374151" />
             </TouchableOpacity>
@@ -279,6 +281,52 @@ export default function Practice() {
             );
           })}
         </ScrollView>
+      </View>
+    </SafeAreaView >
+  );
+}
+
+export const SkeletonPractice = () => {
+  const handleClose = () => router.back();
+
+  return (
+    <SafeAreaView className="flex h-full flex-col justify-center gap-6 bg-white">
+      <View className="relative w-full flex flex-col border-b border-grey-100 items-center gap-4 min-h-[56.9%] p-4" style={{ boxShadow: "-9px 16px 5px 0 rgba(0, 0, 0, 0.00), -6px 11px 5px 0 rgba(0, 0, 0, 0.01), -3px 6px 4px 0 rgba(0, 0, 0, 0.05), -1px 3px 3px 0 rgba(0, 0, 0, 0.09), 0 1px 2px 0 rgba(0, 0, 0, 0.10)" }}>
+        <View className="flex-row items-center justify-between w-full">
+          <TouchableOpacity onPress={handleClose} className="w-9 h-9 rounded-full border border-grey-100 items-center justify-center">
+            <X size={20} className="text-dark-75" />
+          </TouchableOpacity>
+          <View className="relative w-24 h-14 rounded-lg bg-neutral-200 animate-pulse"/>
+        </View>
+
+        <View className="flex flex-row gap-8 items-center justify-start h-8 w-4/5 mr-auto px-3">
+          <View className="h-1.5 flex-1 bg-grey-100 rounded-full w-full relative">
+            <View className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 bg-secondary-01 w-8 h-8 rounded-full flex items-center justify-center z-10">
+              <LoadingProgressSvg width={16} height={16} />
+            </View>
+          </View>
+        </View>
+
+        <View className="flex-1 min-h-0 w-full border border-grey-100 rounded-3xl p-4 flex flex-col gap-6 bg-neutral-200 animate-pulse" style={{ shadowColor: "#000", shadowOpacity: 0.05, shadowRadius: 8, elevation: 2 }}/>
+        <View className="flex flex-row justify-between items-center w-full">
+          <View className="w-24 h-full bg-neutral-200 animate-pulse flex-row items-center justify-between gap-2 border border-gray-200 rounded-full py-2.5 px-4"/>
+          <TouchableOpacity className="py-2.5 px-4 rounded-full bg-secondary-01">
+            <CText className="text-white font-bold text-t3-bold">Nộp bài</CText>
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      <View className="flex-1 mx-4 rounded-2xl border border-gray-100 overflow-hidden">
+        <View className="px-4 pt-3 pb-2 flex-row items-center justify-between">
+          <CText className="text-t3-bold">Danh sách luyện tập</CText>
+        </View>
+        <View className="flex-1 flex flex-col gap-2 px-3">
+          {Array.from({ length: 3 }).map((_, index) => {
+            return (
+              <View key={index} className={cn("flex-row h-10 w-full bg-neutral-200 animate-pulse items-center px-4 py-3 rounded-lg")}/>
+            );
+          })}
+        </View>
       </View>
     </SafeAreaView >
   );

@@ -20,7 +20,7 @@ export const PhoneticDropdown = () => {
     return (
         <View className="relative">
             <TouchableOpacity className="flex-row items-center justify-between gap-2 border border-gray-200 rounded-full py-2.5 px-4" onPress={() => setIsPhoneticDropdownOpen((prev) => !prev)}>
-                <CText className="text-sm font-semibold">{pronunciationTitle}</CText>
+                <CText className="text-t3-regular">{pronunciationTitle}</CText>
                 <Ionicons name="chevron-down" size={14} color="#6B7280" />
             </TouchableOpacity>
             {isPhoneticDropdownOpen && <ScrollView style={{ maxHeight: 200 }} showsVerticalScrollIndicator className="absolute min-w-36 w-max bg-white z-50 top-full mt-2 border border-gray-200 rounded-2xl flex flex-col">
