@@ -21,7 +21,6 @@ function PartCard({ part, onPress }: { part: any; onPress: () => void }) {
   const enumPart = EnumCollection[typeId];
   const enumIcon = EnumIcon[typeId];
   const thumbUrl = part.thumbnail ? `${CMS_URL}/assets/${part.thumbnail}` : null;
-  console.log(part, "part");
 
   return (
     <TouchableOpacity

@@ -27,7 +27,6 @@ export default function Login() {
     const res = await AxiosAPI.post("/v1/login", { username, password }, {
       headers: { "X-Device-Id": deviceId },
     });
-    console.log(res.data?.data?.access_token);
     const access_token = res.data?.data?.access_token;
     if (!access_token) throw new Error("Không nhận được token từ server");
     await setAuthToken(access_token);
@@ -51,6 +50,23 @@ export default function Login() {
       setLoading(false);
     }
   };
+
+  const handleLoginWithMock = async () => {
+
+    if (email?.trim() && password?.trim()) {
+      await handleLogin();
+    } else {
+      try {
+        await login("test56@nomail.com", "123456");
+        router.replace("/course" as never);
+      } catch (err: any) {
+        const msg = err?.response?.data?.message ?? err?.message ?? "Đăng nhập thất bại";
+        setError(msg);
+      } finally {
+        setLoading(false);
+      }
+    }
+  }
 
   return (
     <SafeAreaView className="flex-1 bg-white">
@@ -149,7 +165,7 @@ export default function Login() {
 
             {/* Login button */}
             <TouchableOpacity
-              onPress={handleLogin}
+              onPress={handleLoginWithMock}
               disabled={loading}
               className="bg-primary rounded-2xl py-4 items-center mb-4"
               style={{ opacity: loading ? 0.7 : 1 }}

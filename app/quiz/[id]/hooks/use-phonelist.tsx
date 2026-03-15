@@ -6,9 +6,10 @@ export const usePhoneList = () => {
     const route = useRoute();
     const { id } = route.params as { id: string };
 
-    const { data, isLoading } = useSWR(`/v1/pronunciation-practice/quizzes/2158/sounds?class_id=669`, configSWR);
+    const { data, isLoading, mutate } = useSWR(`/v1/pronunciation-practice/quizzes/2158/sounds?class_id=669`, configSWR);
     return {
         data: data?.data?.data?.parts || [],
         isLoading,
+        mutate,
     }
 }

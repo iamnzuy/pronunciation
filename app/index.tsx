@@ -132,7 +132,6 @@ export default function Onboarding() {
 }
 
 function SlideOne() {
-  console.log("SlideOne");
   return (
     <View style={{ width }} className="px-6 flex-1">
       <View
@@ -170,7 +169,6 @@ function SlideOne() {
 }
 
 function SlideTwo() {
-  console.log("SlideTwo");
   return (
     <View style={{ width }} className="px-6 flex-1">
       <CText className="text-2xl font-bold text-gray-900 mb-1 mt-2">
@@ -209,7 +207,6 @@ function SlideTwo() {
 }
 
 function SlideThree() {
-  console.log("SlideThree");
   return (
     <View style={{ width }} className="px-6 flex-1 justify-center">
       <View className="items-center mb-8">

@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { X } from "lucide-react-native";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Image, ScrollView, Touchable, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ClassNames, FilterOption, FilterTab } from "./constant";
@@ -16,6 +16,7 @@ import { Recorder } from "./components/recorder";
 import { PhoneticDropdown } from "./components/phonetic-dropdown";
 import { usePhoneList } from "@/app/quiz/[id]/hooks/use-phonelist";
 import { PronunciationStore } from "./hooks/store";
+import { SkeletonPractice } from "./components/skeleton";
 
 export const ResultView = ({ currentQuestion, result }: any) => {
   const { question_type } = currentQuestion || {};
@@ -178,12 +179,20 @@ export const PhonemesAndMeaning = ({ currentQuestion, word, stressMap }: { curre
 }
 
 export default function Practice() {
-  const { result, currentQuestionIndex, setCurrentQuestionIndex } = PronunciationStore();
-
-  const { data: questions, title: pronunciationTitle, instruction } = useQuestion();
+  const { result, currentQuestionIndex, setCurrentQuestionIndex, setResult } = PronunciationStore();
+  const { data: questions, title: pronunciationTitle, instruction, isLoading: isLoadingQuestions } = useQuestion();
+  const { isLoading: isLoadingPhoneList } = usePhoneList();
   const draftResult = null;
 
   const [filterTab, setFilterTab] = useState<FilterTab>("all");
+
+  const isLoading = isLoadingQuestions || isLoadingPhoneList;
+
+  useEffect(() => {
+    if (!isLoading) setResult(null);
+  }, [currentQuestionIndex, isLoading]);
+
+  if (isLoading) return <SkeletonPractice />;
 
   const currentQuestion = questions[currentQuestionIndex];
 
@@ -194,9 +203,8 @@ export default function Practice() {
     else if (type === "next" && currentQuestionIndex < questions.length - 1) setCurrentQuestionIndex(currentQuestionIndex + 1);
   };
 
-  const handleSelectWord = (wordId: number) => {
-    const idx = questions.findIndex((w: any) => w.id === wordId);
-    if (idx !== -1) setCurrentQuestionIndex(idx);
+  const handleSelectWord = (wordIndex: number) => {
+    setCurrentQuestionIndex(wordIndex);
   };
 
   return (
@@ -270,63 +278,17 @@ export default function Practice() {
           ))}
         </View>
         <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
-          {questions.map((w: any) => {
+          {questions.map((w: any, wordIndex: number) => {
             const isActive = w.id === currentQuestion?.id;
             const draftResult = null as any;
             return (
-              <TouchableOpacity key={w.id} onPress={() => handleSelectWord(w.id)} className={cn("flex-row items-center px-4 py-3", isActive && "bg-white-25")}>
+              <TouchableOpacity key={w.id} onPress={() => handleSelectWord(wordIndex)} className={cn("flex-row items-center px-4 py-3", isActive && "bg-white-25")}>
                 <CText className="flex-1 w-full min-w-0 line-clamp-2 text-t3-regular">{w.title}</CText>
                 {draftResult && draftResult.status !== null && <CText className={cn("text-t3-bold", draftResult.status === 1 ? "text-secondary-01" : "text-redcolor-500")}>{draftResult.score}%</CText>}
               </TouchableOpacity>
             );
           })}
         </ScrollView>
-      </View>
-    </SafeAreaView >
-  );
-}
-
-export const SkeletonPractice = () => {
-  const handleClose = () => router.back();
-
-  return (
-    <SafeAreaView className="flex h-full flex-col justify-center gap-6 bg-white">
-      <View className="relative w-full flex flex-col border-b border-grey-100 items-center gap-4 min-h-[56.9%] p-4" style={{ boxShadow: "-9px 16px 5px 0 rgba(0, 0, 0, 0.00), -6px 11px 5px 0 rgba(0, 0, 0, 0.01), -3px 6px 4px 0 rgba(0, 0, 0, 0.05), -1px 3px 3px 0 rgba(0, 0, 0, 0.09), 0 1px 2px 0 rgba(0, 0, 0, 0.10)" }}>
-        <View className="flex-row items-center justify-between w-full">
-          <TouchableOpacity onPress={handleClose} className="w-9 h-9 rounded-full border border-grey-100 items-center justify-center">
-            <X size={20} className="text-dark-75" />
-          </TouchableOpacity>
-          <View className="relative w-24 h-14 rounded-lg bg-neutral-200 animate-pulse"/>
-        </View>
-
-        <View className="flex flex-row gap-8 items-center justify-start h-8 w-4/5 mr-auto px-3">
-          <View className="h-1.5 flex-1 bg-grey-100 rounded-full w-full relative">
-            <View className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 bg-secondary-01 w-8 h-8 rounded-full flex items-center justify-center z-10">
-              <LoadingProgressSvg width={16} height={16} />
-            </View>
-          </View>
-        </View>
-
-        <View className="flex-1 min-h-0 w-full border border-grey-100 rounded-3xl p-4 flex flex-col gap-6 bg-neutral-200 animate-pulse" style={{ shadowColor: "#000", shadowOpacity: 0.05, shadowRadius: 8, elevation: 2 }}/>
-        <View className="flex flex-row justify-between items-center w-full">
-          <View className="w-24 h-full bg-neutral-200 animate-pulse flex-row items-center justify-between gap-2 border border-gray-200 rounded-full py-2.5 px-4"/>
-          <TouchableOpacity className="py-2.5 px-4 rounded-full bg-secondary-01">
-            <CText className="text-white font-bold text-t3-bold">Nộp bài</CText>
-          </TouchableOpacity>
-        </View>
-      </View>
-
-      <View className="flex-1 mx-4 rounded-2xl border border-gray-100 overflow-hidden">
-        <View className="px-4 pt-3 pb-2 flex-row items-center justify-between">
-          <CText className="text-t3-bold">Danh sách luyện tập</CText>
-        </View>
-        <View className="flex-1 flex flex-col gap-2 px-3">
-          {Array.from({ length: 3 }).map((_, index) => {
-            return (
-              <View key={index} className={cn("flex-row h-10 w-full bg-neutral-200 animate-pulse items-center px-4 py-3 rounded-lg")}/>
-            );
-          })}
-        </View>
       </View>
     </SafeAreaView >
   );
