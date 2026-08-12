@@ -17,6 +17,8 @@ import { PhoneticDropdown } from "./components/phonetic-dropdown";
 import { usePhoneList } from "@/app/quiz/[id]/hooks/use-phonelist";
 import { PronunciationStore } from "./hooks/store";
 import { SkeletonPractice } from "./components/skeleton";
+import { useDraftAnswerPart } from "./hooks/use-draft-answer";
+import { getHighestStatus } from "./helpers";
 
 export const ResultView = ({ currentQuestion, result }: any) => {
   const { question_type } = currentQuestion || {};
@@ -182,8 +184,7 @@ export default function Practice() {
   const { result, currentQuestionIndex, setCurrentQuestionIndex, setResult } = PronunciationStore();
   const { data: questions, title: pronunciationTitle, instruction, isLoading: isLoadingQuestions } = useQuestion();
   const { isLoading: isLoadingPhoneList } = usePhoneList();
-  const draftResult = null;
-
+  const { mappedDraftResult } = useDraftAnswerPart();
   const [filterTab, setFilterTab] = useState<FilterTab>("all");
 
   const isLoading = isLoadingQuestions || isLoadingPhoneList;
@@ -195,6 +196,8 @@ export default function Practice() {
   if (isLoading) return <SkeletonPractice />;
 
   const currentQuestion = questions[currentQuestionIndex];
+  const currentDraftResult = mappedDraftResult?.get(currentQuestion?.id) || null;
+
 
   const handleClose = () => router.back();
 
@@ -245,7 +248,7 @@ export default function Practice() {
             >
               <Ionicons name="arrow-back" size={18} color="#374151" />
             </TouchableOpacity>
-            {(result || draftResult) ? <ResultView currentQuestion={currentQuestion} result={result || draftResult} /> : <QuestionView currentQuestion={currentQuestion} />}
+            {(result || currentDraftResult) ? <ResultView currentQuestion={currentQuestion} result={result || currentDraftResult} /> : <QuestionView currentQuestion={currentQuestion} />}
             <TouchableOpacity
               onPress={() => handleChangeQuestion("next")}
               disabled={currentQuestionIndex >= questions.length - 1}
@@ -255,7 +258,7 @@ export default function Practice() {
               <Ionicons name="arrow-forward" size={18} color="#374151" />
             </TouchableOpacity>
           </View>
-          <Recorder currentQuestion={currentQuestion} />
+          <Recorder key={currentQuestionIndex} currentQuestion={currentQuestion} />
         </View>
         <View className="flex flex-row justify-between items-center w-full">
           <PhoneticDropdown />
@@ -278,13 +281,17 @@ export default function Practice() {
           ))}
         </View>
         <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
-          {questions.map((w: any, wordIndex: number) => {
-            const isActive = w.id === currentQuestion?.id;
-            const draftResult = null as any;
+          {questions.map((question: any, questionIndex: number) => {
+            const isActive = question.id === currentQuestion?.id;
+            const draftResult = mappedDraftResult?.get(question.id) || {} as any;
+            const highestStatus = getHighestStatus(question, draftResult);
+            if (filterTab === "not_passed" && highestStatus?.status !== 0) return null;
+            if (filterTab === "not_practiced" && typeof highestStatus?.status === "number") return null;
+            
             return (
-              <TouchableOpacity key={w.id} onPress={() => handleSelectWord(wordIndex)} className={cn("flex-row items-center px-4 py-3", isActive && "bg-white-25")}>
-                <CText className="flex-1 w-full min-w-0 line-clamp-2 text-t3-regular">{w.title}</CText>
-                {draftResult && draftResult.status !== null && <CText className={cn("text-t3-bold", draftResult.status === 1 ? "text-secondary-01" : "text-redcolor-500")}>{draftResult.score}%</CText>}
+              <TouchableOpacity key={question.id} onPress={() => handleSelectWord(questionIndex)} className={cn("flex-row items-center px-4 py-3", isActive && "bg-white-25")}>
+                <CText className="flex-1 w-full min-w-0 line-clamp-2 text-t3-regular">{question.title}</CText>
+                {(highestStatus?.status || highestStatus?.status == 0) && <CText className={cn("text-t3-bold", highestStatus?.status === 1 ? "text-secondary-01" : "text-redcolor-500")}>{highestStatus?.score}%</CText>}
               </TouchableOpacity>
             );
           })}

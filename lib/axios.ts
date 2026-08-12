@@ -53,15 +53,20 @@ AxiosAPI.interceptors.request.use(async (config: any) => {
   return config;
 });
 
-export const fetcherClient = (url: any, params: any) => {
-  if (!url) return;
+export const fetcherClient = (url: any, params?: any) => {
+  // Một số chỗ dùng SWR key dạng [path, queryParams]
+  if (Array.isArray(url) && url.length >= 1) {
+    return AxiosClient.get(url[0], { params: url[1] });
+  }
+
+  if (typeof url !== "string" || !url) {
+    return Promise.reject(new Error("fetcherClient: url phải là chuỗi không rỗng"));
+  }
 
   if (url.indexOf("/v1/") > -1 || url.indexOf("/systems/") > -1) {
-    return AxiosAPI.get(url, { params });
-  } else {
-    if (typeof url === "string") return AxiosClient.get(url, { params });
-    else if (typeof url === "object") return AxiosClient.get(url[0], { params: url[1] });
+    return AxiosAPI.get(url, params != null ? { params } : undefined);
   }
+  return AxiosClient.get(url, params != null ? { params } : undefined);
 };
 
 export const optionsFetch = { fetcher: fetcherClient };

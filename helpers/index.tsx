@@ -2,7 +2,7 @@ export const generateStressMap = (fullIpa: string, phonemeList: any[]): any => {
     const map: any = {};
     if (!fullIpa || !phonemeList) return map;
     let processingStr = fullIpa.replace(/[\/\s]/g, "")
-    for (let i = 0; i < phonemeList.length; i++) {
+    for (let i = 0; i < phonemeList?.length; i++) {
         if (processingStr.startsWith("ˈ") || processingStr.startsWith("'")) {
             map[i] = "primary";
             processingStr = processingStr.substring(1);
@@ -14,7 +14,7 @@ export const generateStressMap = (fullIpa: string, phonemeList: any[]): any => {
 
         const pText = phonemeList[i]?.phoneme || "";
         if (processingStr.startsWith(pText)) {
-            processingStr = processingStr.substring(pText.length);
+            processingStr = processingStr.substring(pText?.length);
         }
     }
     return map;

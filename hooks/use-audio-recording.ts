@@ -99,5 +99,6 @@ export function useAudioRecording() {
     playRecording,
     playAudioUrl,
     clearRecording,
+    setRecordedUri,
   };
 }

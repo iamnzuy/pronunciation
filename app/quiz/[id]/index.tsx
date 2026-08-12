@@ -42,7 +42,7 @@ const ENTITY_LABEL: Record<keyof ProgressMap, string> = {
 
 function getCardStatus(progress: ProgressMap) {
   const stats = Object.values(progress).filter(Boolean) as ProgressStat[];
-  if (stats.length === 0) return "not_practiced";
+  if (stats?.length === 0) return "not_practiced";
   const allPassed = stats.every((s) => s.passed === s.total && s.total > 0);
   if (allPassed) return "passed";
   const anyPracticed = stats.some((s) => s.passed > 0 || s.not_passed > 0);

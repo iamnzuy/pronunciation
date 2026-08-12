@@ -6,13 +6,17 @@ import AxiosClient, { AxiosAPI } from "@/lib/axios";
 import { cn } from "@/lib/utils";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams } from "expo-router";
-import React, { useCallback, useEffect, useRef } from "react";
-import { Animated, TouchableOpacity, View } from "react-native";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { ActivityIndicator, Animated, TouchableOpacity, View } from "react-native";
 import { PronunciationStore, setIsPracticing } from "../hooks/store";
+import { useDraftAnswerPart } from "../hooks/use-draft-answer";
+import { LoaderCircle } from "lucide-react-native";
 
 export const Recorder = ({ currentQuestion }: { currentQuestion: any }) => {
     const { id: questionId } = currentQuestion || {};
     const { id: quizId, classId, pronunciation: partId } = useLocalSearchParams();
+    const { mappedDraftResult } = useDraftAnswerPart();
+    const currentDraftResult = mappedDraftResult?.get(questionId) || {} as any;
 
     const { mutate } = usePhoneList();
     const result = PronunciationStore((s) => s.result);
@@ -22,6 +26,7 @@ export const Recorder = ({ currentQuestion }: { currentQuestion: any }) => {
     const { isRecording, recordedUri, startRecording, stopRecording, playRecording, playAudioUrl } = useAudioRecording();
     const pulseAnim = useRef(new Animated.Value(1)).current;
     const pulseLoopRef = useRef<Animated.CompositeAnimation | null>(null);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     useEffect(() => {
         if (isRecording) {
@@ -40,6 +45,7 @@ export const Recorder = ({ currentQuestion }: { currentQuestion: any }) => {
     }, [isRecording, pulseAnim]);
 
     const submitAnswer = async (blob: any) => {
+        setIsSubmitting(true);
         const audioBlob = new Blob([blob], { type: "audio/mpeg" });
         const formData = new FormData();
         formData.append("folder", "5481ceed-0b6c-447f-a2dd-e8bf5c4efe4d");
@@ -65,6 +71,7 @@ export const Recorder = ({ currentQuestion }: { currentQuestion: any }) => {
             console.log(error);
             setModal("errorUpload");
         } finally {
+            setIsSubmitting(false);
             setIsPracticing(false);
         }
     };
@@ -90,11 +97,28 @@ export const Recorder = ({ currentQuestion }: { currentQuestion: any }) => {
                     <Ionicons name={isRecording ? "stop" : "mic"} size={26} color="white" />
                 </TouchableOpacity>
             </Animated.View>
-            <TouchableOpacity onPress={playRecording} activeOpacity={0.8} className={cn("flex-1 flex flex-row items-center justify-center gap-2 min-h-12 py-1 px-2 border border-[#e5e5ea] rounded-full", !recordedUri && "opacity-0 pointer-events-none")}>
-                <PlayIconWithCircle className="w-6 h-6 flex-shrink-0" fill="#1d1d1f" />
-                <View className={cn("h-8 px-3 rounded-full flex items-center justify-center", result?.status === 1 ? "bg-secondary-01" : "bg-teritary-01")}>
-                    <CText className="text-t4-bold text-white">{result?.score || 0}%</CText>
-                </View>
+            <TouchableOpacity
+                onPress={playRecording}
+                activeOpacity={0.8}
+                disabled={isSubmitting}
+                className={cn(
+                    "flex-1 flex flex-row items-center justify-center gap-2 min-h-12 py-1 px-2 border border-[#e5e5ea] rounded-full",
+                    (!recordedUri && !currentDraftResult?.file_id) && "opacity-0 pointer-events-none",
+                    isSubmitting && "opacity-80"
+                )}
+            >
+                {isSubmitting ? (
+                    <View className="h-8 w-8 items-center justify-center">
+                        <ActivityIndicator size="small" color="#1d1d1f" />
+                    </View>
+                ) : (
+                    <PlayIconWithCircle className="w-6 h-6 flex-shrink-0" fill="#1d1d1f" />
+                )}
+                {(result?.score === 0 || result?.score || currentDraftResult?.score === 0 || currentDraftResult?.score) && !isSubmitting && (
+                    <View className={cn("h-8 px-3 rounded-full flex items-center justify-center", result?.status === 1 ? "bg-secondary-01" : "bg-teritary-01")}>
+                        <CText className="text-t4-bold text-white">{result?.score ?? currentDraftResult?.score}%</CText>
+                    </View>
+                )}
             </TouchableOpacity>
         </View>
     )
