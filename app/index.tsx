@@ -220,7 +220,6 @@ function SlideThree() {
         </CText>
       </View>
 
-      {/* Feature highlights */}
       {[
         { icon: "✅", text: "Chấm điểm Speaking & Writing bằng AI" },
         { icon: "📊", text: "Theo dõi tiến độ học tập chi tiết" },

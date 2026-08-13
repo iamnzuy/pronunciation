@@ -10,7 +10,7 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.anonymous.pronunciation"
+      "bundleIdentifier": "com.youpass.pronunciation"
     },
     "android": {
       "adaptiveIcon": {
@@ -21,7 +21,7 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.anonymous.pronunciation"
+      "package": "com.youpass.pronunciation"
     },
     "web": {
       "output": "static",

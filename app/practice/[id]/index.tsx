@@ -198,7 +198,6 @@ export default function Practice() {
   const currentQuestion = questions[currentQuestionIndex];
   const currentDraftResult = mappedDraftResult?.get(currentQuestion?.id) || null;
 
-
   const handleClose = () => router.back();
 
   const handleChangeQuestion = (type: "previous" | "next") => {
@@ -287,7 +286,7 @@ export default function Practice() {
             const highestStatus = getHighestStatus(question, draftResult);
             if (filterTab === "not_passed" && highestStatus?.status !== 0) return null;
             if (filterTab === "not_practiced" && typeof highestStatus?.status === "number") return null;
-            
+
             return (
               <TouchableOpacity key={question.id} onPress={() => handleSelectWord(questionIndex)} className={cn("flex-row items-center px-4 py-3", isActive && "bg-white-25")}>
                 <CText className="flex-1 w-full min-w-0 line-clamp-2 text-t3-regular">{question.title}</CText>

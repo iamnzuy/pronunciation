@@ -14,7 +14,6 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -79,13 +78,14 @@ export default function Login() {
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          {/* Back button */}
-          <TouchableOpacity
-            onPress={() => router.back()}
-            className="px-6 pt-4 pb-2"
-          >
-            <CText className="text-gray-500 text-base">← Quay lại</CText>
-          </TouchableOpacity>
+          <View className="flex-row items-center justify-between px-6 pt-4 pb-2">
+            <TouchableOpacity onPress={() => router.back()}>
+              <CText className="text-gray-500 text-base">← Quay lại</CText>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => router.push("/landing" as never)}>
+              <CText className="text-primary text-base font-medium">Tìm hiểu YouPass</CText>
+            </TouchableOpacity>
+          </View>
 
           <View className="px-6 flex-1">
             <View className="items-center mt-6 mb-10">
@@ -99,7 +99,6 @@ export default function Login() {
               </CText>
             </View>
 
-            {/* Title */}
             <CText className="text-2xl font-bold text-gray-900 mb-1">
               Chào mừng trở lại! 👋
             </CText>
@@ -107,7 +106,6 @@ export default function Login() {
               Đăng nhập để tiếp tục hành trình IELTS của bạn
             </CText>
 
-            {/* Email */}
             <View className="mb-4">
               <CText className="text-gray-700 text-sm font-semibold mb-2">
                 Email
@@ -126,7 +124,6 @@ export default function Login() {
               </View>
             </View>
 
-            {/* Password */}
             <View className="mb-2">
               <CText className="text-gray-700 text-sm font-semibold mb-2">
                 Mật khẩu
@@ -149,21 +146,18 @@ export default function Login() {
               </View>
             </View>
 
-            {/* Forgot password */}
             <TouchableOpacity className="self-end mb-4">
               <CText className="text-primary text-sm font-medium">
                 Quên mật khẩu?
               </CText>
             </TouchableOpacity>
 
-            {/* Error message */}
             {!!error && (
               <View className="bg-red-50 border border-red-200 rounded-xl px-4 py-3 mb-4">
                 <CText className="text-red-500 text-sm">{error}</CText>
               </View>
             )}
 
-            {/* Login button */}
             <TouchableOpacity
               onPress={handleLoginWithMock}
               disabled={loading}
@@ -176,14 +170,12 @@ export default function Login() {
               }
             </TouchableOpacity>
 
-            {/* Divider */}
             <View className="flex-row items-center mb-4">
               <View className="flex-1 h-px bg-gray-200" />
               <CText className="mx-4 text-gray-400 text-sm">hoặc</CText>
               <View className="flex-1 h-px bg-gray-200" />
             </View>
 
-            {/* Social login */}
             <TouchableOpacity className="border border-gray-200 rounded-2xl py-4 items-center flex-row justify-center mb-3">
               <CText className="mr-2 text-lg">🌐</CText>
               <CText className="text-gray-700 font-semibold">
@@ -191,7 +183,6 @@ export default function Login() {
               </CText>
             </TouchableOpacity>
 
-            {/* Register */}
             <View className="flex-row justify-center mt-6 pb-8">
               <CText className="text-gray-500 text-sm">Chưa có tài khoản? </CText>
               <TouchableOpacity>

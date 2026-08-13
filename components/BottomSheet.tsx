@@ -67,14 +67,12 @@ const BottomSheet = ({
       animationType="none"
       onRequestClose={() => !disableClose && toggle()}
     >
-      {/* Backdrop */}
       <Animated.View style={[StyleSheet.absoluteFill, styles.backdrop, backdropStyle]}>
         <TouchableWithoutFeedback onPress={() => !disableClose && toggle()}>
           <View style={StyleSheet.absoluteFill} />
         </TouchableWithoutFeedback>
       </Animated.View>
 
-      {/* Sheet */}
       <Animated.View style={[styles.sheet, sheetStyle]}>
         <View style={styles.handle} />
         {children}

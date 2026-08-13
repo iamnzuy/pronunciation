@@ -87,7 +87,6 @@ const Tooltip = ({ content, children }: TooltipProps) => {
               ]}
             >
               {content}
-              {/* Arrow */}
               <View
                 style={[
                   styles.arrow,

@@ -42,7 +42,6 @@ function PartCard({ part, onPress }: { part: any; onPress: () => void }) {
         )}
       </View>
 
-      {/* Content */}
       <View className="flex-1 gap-0.5">
         <CText className="text-gray-400" style={{ fontSize: 11 }}>{enumPart?.subTitle}:</CText>
         <CText className="text-gray-800 font-semibold text-sm leading-snug" numberOfLines={2}>

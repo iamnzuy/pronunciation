@@ -14,7 +14,6 @@ import { EnityName } from "@/app/practice/[id]/constant";
 import { usePhoneList } from "./hooks/use-phonelist";
 import { useRoute } from "@react-navigation/native";
 
-// ---- Types ----
 type ProgressStat = {
   total: number;
   passed: number;
@@ -76,7 +75,6 @@ function DonutProgress({ stat }: { stat: ProgressStat }) {
   );
 }
 
-// ---- Main component ----
 export default function PhoneList() {
   const [activeIndex, setActiveIndex] = useState(0);
   const { data: phoneticList, isLoading } = usePhoneList();
@@ -90,7 +88,6 @@ export default function PhoneList() {
 
   return (
     <SafeAreaView className="flex-1 bg-white">
-      {/* Header */}
       <View className="px-4 pt-3 pb-2 flex-row items-center">
         <TouchableOpacity onPress={() => router.back()} className="mr-2">
           <Ionicons name="arrow-back" size={22} color="#374151" />
@@ -105,7 +102,6 @@ export default function PhoneList() {
         </CText>
       </View>
 
-      {/* Legend */}
       <View className="flex-row justify-center gap-4 pb-3">
         {[
           { color: "#13A62E", label: "Đạt" },
@@ -122,7 +118,6 @@ export default function PhoneList() {
         ))}
       </View>
 
-      {/* Phonetic grid */}
       <ScrollView
         className="flex-1 px-4"
         showsVerticalScrollIndicator={false}
@@ -156,7 +151,6 @@ export default function PhoneList() {
                     gap: 10,
                   }}
                 >
-                  {/* Title row */}
                   <View className="flex-row items-center justify-between">
                     <CText className="font-bold text-sm text-gray-900">
                       Âm {item.title}
@@ -199,7 +193,6 @@ export default function PhoneList() {
         )}
       </ScrollView>
 
-      {/* Start button */}
       <View className="px-6 py-4 border-t border-gray-100">
         <TouchableOpacity
           onPress={handleStart}

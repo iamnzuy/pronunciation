@@ -1,10 +1,79 @@
-/** @type {import('tailwindcss').Config} */
+const plugin = require("tailwindcss/plugin");
+
+const NUNITO = {
+  400: "Nunito_400Regular",
+  500: "Nunito_500Medium",
+  600: "Nunito_600SemiBold",
+  700: "Nunito_700Bold",
+  800: "Nunito_800ExtraBold",
+  900: "Nunito_900Black",
+};
+
+const TYPOGRAPHY = {
+  "h1-bold": [72, 90, 700, -1.44],
+  "web-h2": [60, 68, 700, -1.2],
+  "h3-bold": [48, 60, 700, -0.96],
+  "h4-bold": [36, 44, 700, -0.72],
+  "h5-bold": [30, 38, 700],
+  "h6-bold": [24, 32, 700],
+  h5: [24, 28, 800],
+  h6: [20, 24, 700],
+  "t1-bold": [20, 24, 700],
+  "t1-regular": [20, 24, 400],
+  "t2-bold": [18, 22, 700],
+  "t2-medium": [18, 22, 500],
+  "t2-regular": [18, 22, 400],
+  "t3-bold": [16, 20, 700],
+  "t3-semibold": [16, 20, 600],
+  "t3-medium": [16, 20, 500],
+  t3: [16, 20, 400],
+  "t4-bold": [14, 18, 700],
+  "t4-regular": [14, 18, 400],
+  "t5-bold": [12, 14, 700],
+  "t5-regular": [12, 14, 400],
+  body02: [14, 18, 400],
+};
+
+const WEIGHT_ALIASES = {
+  normal: 400,
+  medium: 500,
+  semibold: 600,
+  bold: 700,
+  extrabold: 800,
+  black: 900,
+};
+
+const typographyPlugin = plugin(({ addUtilities }) => {
+  const typography = {};
+  const weights = {};
+
+  for (const [name, [fontSize, lineHeight, fontWeight, letterSpacing]] of Object.entries(TYPOGRAPHY)) {
+    typography[`.text-${name}`] = {
+      fontFamily: NUNITO[fontWeight],
+      fontSize: `${fontSize}px`,
+      lineHeight: `${lineHeight}px`,
+      fontWeight: `${fontWeight}`,
+      ...(letterSpacing !== undefined && { letterSpacing: `${letterSpacing}px` }),
+    };
+  }
+
+  for (const [alias, weight] of Object.entries(WEIGHT_ALIASES)) {
+    weights[`.font-${alias}`] = { fontFamily: NUNITO[weight], fontWeight: `${weight}` };
+  }
+  for (const [weight, family] of Object.entries(NUNITO)) {
+    weights[`.font-nunito-${weight}`] = { fontFamily: family, fontWeight: weight };
+  }
+
+  addUtilities(typography);
+  addUtilities(weights);
+});
+
 module.exports = {
   content: ["./app/**/*.{js,jsx,ts,tsx}", "./components/**/*.{js,jsx,ts,tsx}"],
   presets: [require("nativewind/preset")],
   theme: {
     fontFamily: {
-      nunito: ["Nunito", "sans-serif"],
+      nunito: ["Nunito_400Regular", "Nunito", "sans-serif"],
     },
     extend: {
       lineClamp: {
@@ -24,15 +93,16 @@ module.exports = {
       },
       screens: {
         tablet: "640px",
-        // => @media (min-width: 640px) { ... }
 
         laptop: "1024px",
-        // => @media (min-width: 1024px) { ... }
 
         desktop: "1280px",
         "desktop-2xl": "1440px",
-        // => @media (min-width: 1280px) { ... }
         "desktop-3xl": "1536px",
+
+        "hd+": "1440px",
+        "3xl": "1920px",
+        "4xl": "2560px",
       },
       keyframes: {
         "accordion-down": {
@@ -118,6 +188,7 @@ module.exports = {
         },
         orange: {
           "01": "#FBEFE4",
+          "02": "#FFF0EB",
           "03": "#FFFAF6",
         },
         teritary: {
@@ -188,5 +259,5 @@ module.exports = {
       },
     },
   },
-  plugins: [],
+  plugins: [typographyPlugin],
 }
