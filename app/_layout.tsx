@@ -33,13 +33,13 @@ export default function RootLayout() {
 
   return (
     <SafeAreaProvider>
-      <Stack>
-        <Stack.Screen name="index" options={{ headerShown: false }} />
-        <Stack.Screen name="landing" options={{ headerShown: false }} />
-        <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-        <Stack.Screen name="practice/[id]" options={{ headerShown: false }} />
-        <Stack.Screen name="course" options={{ headerShown: false }} />
-        <Stack.Screen name="quiz/[id]" options={{ headerShown: false }} />
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="onboarding" />
+        <Stack.Screen name="(auth)" />
+        <Stack.Screen name="practice/[id]" />
+        <Stack.Screen name="course" />
+        <Stack.Screen name="quiz/[id]" />
       </Stack>
     </SafeAreaProvider>
   );
