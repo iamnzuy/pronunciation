@@ -8,9 +8,9 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { getTypeId } from "./helpers";
-import { EnumCollection, EnumIcon } from "./constant";
-import { useClass } from "./hooks/use-class";
+import { getTypeId } from "@/components/course/helpers";
+import { EnumCollection, EnumIcon } from "@/components/course/constant";
+import { useClass } from "@/components/course/hooks/use-class";
 import { CText } from "@/components/CText";
 
 const CMS_URL = process.env.EXPO_PUBLIC_CMS;

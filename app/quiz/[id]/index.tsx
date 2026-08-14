@@ -10,8 +10,8 @@ import {
   View
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { EnityName } from "@/app/practice/[id]/constant";
-import { usePhoneList } from "./hooks/use-phonelist";
+import { EnityName } from "@/components/practice/constant";
+import { usePhoneList } from "@/components/quiz/hooks/use-phonelist";
 import { useRoute } from "@react-navigation/native";
 
 type ProgressStat = {

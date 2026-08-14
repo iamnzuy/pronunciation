@@ -1,10 +1,10 @@
-import { usePhoneList } from "@/app/quiz/[id]/hooks/use-phonelist";
+import { usePhoneList } from "@/components/quiz/hooks/use-phonelist";
 import { CText } from "@/components/CText";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { useState } from "react";
 import { ScrollView, TouchableOpacity, View } from "react-native";
-import { useQuestion } from "../hooks/use-question";
+import { useQuestion } from "@/components/practice/hooks/use-question";
 
 export const PhoneticDropdown = () => {
     const { pronunciation } = useLocalSearchParams();

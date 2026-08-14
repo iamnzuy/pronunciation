@@ -1,4 +1,4 @@
-import { usePhoneList } from "@/app/quiz/[id]/hooks/use-phonelist";
+import { usePhoneList } from "@/components/quiz/hooks/use-phonelist";
 import { CText } from "@/components/CText";
 import { useAudioRecording } from "@/hooks/use-audio-recording";
 import { PlayIconWithCircle, Volume2Icon } from "@/icons";
@@ -8,8 +8,8 @@ import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams } from "expo-router";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { ActivityIndicator, Animated, TouchableOpacity, View } from "react-native";
-import { PronunciationStore, setIsPracticing } from "../hooks/store";
-import { useDraftAnswerPart } from "../hooks/use-draft-answer";
+import { PronunciationStore, setIsPracticing } from "@/components/practice/hooks/store";
+import { useDraftAnswerPart } from "@/components/practice/hooks/use-draft-answer";
 import { LoaderCircle } from "lucide-react-native";
 
 export const Recorder = ({ currentQuestion }: { currentQuestion: any }) => {

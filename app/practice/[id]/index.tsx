@@ -10,15 +10,15 @@ import { X } from "lucide-react-native";
 import React, { useEffect, useState } from "react";
 import { Image, ScrollView, Touchable, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { ClassNames, FilterOption, FilterTab } from "./constant";
-import { useQuestion } from "./hooks/use-question";
-import { Recorder } from "./components/recorder";
-import { PhoneticDropdown } from "./components/phonetic-dropdown";
-import { usePhoneList } from "@/app/quiz/[id]/hooks/use-phonelist";
-import { PronunciationStore } from "./hooks/store";
-import { SkeletonPractice } from "./components/skeleton";
-import { useDraftAnswerPart } from "./hooks/use-draft-answer";
-import { getHighestStatus } from "./helpers";
+import { ClassNames, FilterOption, FilterTab } from "@/components/practice/constant";
+import { useQuestion } from "@/components/practice/hooks/use-question";
+import { Recorder } from "@/components/practice/components/recorder";
+import { PhoneticDropdown } from "@/components/practice/components/phonetic-dropdown";
+import { usePhoneList } from "@/components/quiz/hooks/use-phonelist";
+import { PronunciationStore } from "@/components/practice/hooks/store";
+import { SkeletonPractice } from "@/components/practice/components/skeleton";
+import { useDraftAnswerPart } from "@/components/practice/hooks/use-draft-answer";
+import { getHighestStatus } from "@/components/practice/helpers";
 
 export const ResultView = ({ currentQuestion, result }: any) => {
   const { question_type } = currentQuestion || {};
